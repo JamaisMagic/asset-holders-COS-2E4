@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+  explorer_picoluna_com:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development
+    image: explorer_picoluna_com:latest
+    environment:
+      APP_ENV: "development"
+      APP_PORT: 8020
+      REDIS_HOST: explorer_picoluna_com_redis
+      REDIS_PORT: 6379
+      MYSQL_HOST: www_mysql_5
+      MYSQL_PORT: 3306
+      MYSQL_USER: "root"
+      MYSQL_PWD: "123456"
+      MYSQL_DB_NAME: "explorer_picoluna_com"
+    expose:
+      - "8020"
+    ports:
+      - "8020-8021:8020"
+    networks:
+      - webnet
+    restart: always
+    volumes:
+      - "/data/app/asset-holders-COS-2E4/src:/data/app/asset-holders-COS-2E4/src"
+      - "/data/log/asset-holders-COS-2E4:/data/log/asset-holders-COS-2E4"
+    depends_on:
+      - explorer_picoluna_com_redis
+  explorer_picoluna_com_redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - webnet
+networks:
+  webnet:
+    name: webnet
+    driver: bridge
