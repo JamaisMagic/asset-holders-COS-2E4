@@ -20,7 +20,7 @@ services:
     expose:
       - "8020"
     ports:
-      - "8020-8021:8020"
+      - "8020:8020"
     networks:
       - webnet
     restart: always
