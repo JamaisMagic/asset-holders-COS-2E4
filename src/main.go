@@ -6,7 +6,10 @@ import (
 	"time"
 	"io/ioutil"
 	"os"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
+
 
 func createServer() {
 	port := os.Getenv("PORT")
@@ -28,7 +31,7 @@ func createServer() {
 }
 
 func createTicker() {
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(30 * 60 * time.Second)
 	go func() {
 		for range ticker.C {
 			getFromBinance()
@@ -53,8 +56,13 @@ func getFromBinance() {
 }
 
 func main() {
+	// db, dbError := sql.Open("mysql", "root:123456@/explorer_picoluna_com")
+	//
+	// if dbError != nil {
+	//
+	// }
 	go createTicker()
 	createServer()
 }
 
-// 127.0.0.1:6379 explorer_picoluna_com asset_holders
+// asset_holders
