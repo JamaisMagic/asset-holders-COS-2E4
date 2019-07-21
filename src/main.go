@@ -5,9 +5,16 @@ import (
 	"fmt"
 	"time"
 	"io/ioutil"
+	"os"
 )
 
 func createServer() {
+	port := os.Getenv("PORT")
+
+	if len(port) <= 0 {
+		port = "8020"
+	}
+
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4", func(writer http.ResponseWriter, request *http.Request) {
 		page := request.URL.Query().Get("page")
 		rows := request.URL.Query().Get("rows")
@@ -15,11 +22,11 @@ func createServer() {
 		fmt.Println("Hello, page: %s, rows: %s", page, rows)
 	})
 
-	http.ListenAndServe(":3001", nil)
+	http.ListenAndServe(":" + port, nil)
 }
 
 func createTicker() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(30 * time.Second)
 	go func() {
 		for range ticker.C {
 			getFromBinance()
