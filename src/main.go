@@ -105,15 +105,15 @@ func buildInsertSql(data HoldersResData) string {
 	list := data.AddressHolders
 	var sb strings.Builder
 
-	sb.WriteString("INSERT INTO asset_holders (address,percentage,quantity,tag) VALUES")
+	sb.WriteString("INSERT INTO asset_holders (address,percentage,quantity,tag) VALUES ")
 
 	for i := 0; i < len(list); i++ {
 		item := list[i]
 
 		if i == len(list) - 1 {
-			sb.WriteString(fmt.Sprintf("(%s,%f,%f,%s);", item.Address, item.Quantity, item.Percentage, item.Tag))
+			sb.WriteString(fmt.Sprintf(`("%s","%f","%f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		} else {
-			sb.WriteString(fmt.Sprintf("(%s,%f,%f,%s),", item.Address, item.Quantity, item.Percentage, item.Tag))
+			sb.WriteString(fmt.Sprintf(`("%s","%f","%f","%s"),`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		}
 	}
 	return sb.String()
