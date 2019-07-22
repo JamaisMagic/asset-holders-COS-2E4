@@ -34,20 +34,22 @@ func createServer() {
 		port = "8020"
 	}
 
-	fmt.Println(time.Now().String(), "port: ", port)
-
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4", func(writer http.ResponseWriter, request *http.Request) {
 		page := request.URL.Query().Get("page")
 		rows := request.URL.Query().Get("rows")
+
+
 		fmt.Fprintf(writer, "Hello, page: %s, rows: %s", page, rows)
-		fmt.Println(time.Now().String(), "Hello, page: %s, rows: %s", page, rows)
 	})
+
+	fmt.Println(time.Now().String(), "Listening port: ", port)
 
 	http.ListenAndServe(":" + port, nil)
 }
 
 func createTicker() {
 	getDataFromBinance()
+
 	ticker := time.NewTicker(1800 * time.Second)
 	go func() {
 		for range ticker.C {
@@ -57,65 +59,86 @@ func createTicker() {
 }
 
 func getDataFromBinance() {
-	response, error := http.Get("https://explorer.binance.org/api/v1/asset-holders?page=1&rows=2&asset=COS-2E4")
-	if error != nil {
-		fmt.Println(time.Now().String(), "responseError: ", error)
+	response, responseError := http.Get("https://explorer.binance.org/api/v1/asset-holders?page=1&rows=0&asset=COS-2E4")
+
+	if responseError != nil {
+		fmt.Println(time.Now().String(), "responseError: ", responseError)
+		panic(responseError)
 	}
 
 	defer response.Body.Close()
 
 	body, bodyError := ioutil.ReadAll(response.Body)
-	if error != nil {
-		fmt.Println(time.Now().String(), "bodyError: ", bodyError)
-	}
 
-	// fmt.Println(time.Now().String(), "string body", string(body))
+	if bodyError != nil {
+		fmt.Println(time.Now().String(), "bodyError: ", bodyError)
+		panic(bodyError)
+	}
 
 	var decodedBody HoldersResData
 	decodedError := json.Unmarshal(body, &decodedBody)
 
 	if decodedError != nil {
 		fmt.Println(time.Now().String(), "decodedError: ", decodedError)
+		panic(decodedError)
 	}
 
-	deleteRe, deleteError := mysqlDb.Query("delete from asset_holders")
+	updateNewData(decodedBody)
+}
+
+func updateNewData(decodedBody HoldersResData) {
+	tx, txError := mysqlDb.Begin()
+
+	if txError != nil {
+		fmt.Println(time.Now().String(), "txError: ", txError)
+		panic(txError)
+	}
+
+	_, deleteError := tx.Exec("delete from asset_holders;")
 
 	if deleteError != nil {
+		tx.Rollback()
 		fmt.Println(time.Now().String(), "deleteError: ", deleteError)
+		panic(deleteError)
 	}
-
-	defer deleteRe.Close()
 
 	sqlStr := buildInsertSql(decodedBody)
 
-	fmt.Println(time.Now().String(), "sqlStr: ", sqlStr)
-
-	insert, insertError := mysqlDb.Query(sqlStr)
+	_, insertError := tx.Exec(sqlStr)
 
 	if insertError != nil {
+		tx.Rollback()
 		fmt.Println(time.Now().String(), "insertError: ", insertError)
+		panic(insertError)
 	}
 
-	defer insert.Close()
+	commitError := tx.Commit()
 
-	fmt.Println(time.Now().String(), decodedBody.TotalNum, decodedBody.AddressHolders)
+	if commitError != nil {
+		tx.Rollback()
+		fmt.Println(time.Now().String(), "commitError: ", commitError)
+		panic(commitError)
+	}
 }
 
 func buildInsertSql(data HoldersResData) string {
 	list := data.AddressHolders
+	listLen := len(list)
 	var sb strings.Builder
 
 	sb.WriteString("INSERT INTO asset_holders (address,quantity,percentage,tag) VALUES ")
 
-	for i := 0; i < len(list); i++ {
+	for i := 0; i < listLen; i++ {
 		item := list[i]
 
-		if i == len(list) - 1 {
+		// should encode values or using prepare statement for security reason.
+		if i == listLen - 1 {
 			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		} else {
 			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s"),`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		}
 	}
+
 	return sb.String()
 }
 
@@ -133,13 +156,19 @@ func connectDb() {
 
 	if dbError != nil {
 		fmt.Println(time.Now().String(), "dbError: ", dbError)
+		panic(dbError)
 	}
-
-	// defer mysqlDb.Close()
 }
 
 func main() {
 	connectDb()
 	go createTicker()
+
+	defer func() {
+		if mysqlDb != nil {
+			mysqlDb.Close()
+		}
+	}()
+
 	createServer()
 }
