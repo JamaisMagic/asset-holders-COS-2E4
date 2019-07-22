@@ -78,13 +78,13 @@ func getDataFromBinance() {
 		fmt.Println(time.Now().String(), "decodedError", decodedError)
 	}
 
-	delete, deleteError := mysqlDb.Query("delete from asset_holders")
+	deleteRe, deleteError := mysqlDb.Query("delete from asset_holders")
 
 	if deleteError != nil {
 		fmt.Println(time.Now().String(), "deleteError", deleteError)
 	}
 
-	defer delete.Close()
+	defer deleteRe.Close()
 
 	sqlStr := buildInsertSql(decodedBody)
 
@@ -133,7 +133,7 @@ func connectDb() {
 		fmt.Println(time.Now().String(), "dbError", dbError)
 	}
 
-	defer mysqlDb.Close()
+	// defer mysqlDb.Close()
 }
 
 func main() {
