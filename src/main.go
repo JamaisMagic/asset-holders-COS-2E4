@@ -111,9 +111,9 @@ func buildInsertSql(data HoldersResData) string {
 		item := list[i]
 
 		if i == len(list) - 1 {
-			sb.WriteString(fmt.Sprintf(`("%s","%f","%f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
+			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		} else {
-			sb.WriteString(fmt.Sprintf(`("%s","%f","%f","%s"),`, item.Address, item.Quantity, item.Percentage, item.Tag))
+			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s"),`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		}
 	}
 	return sb.String()
