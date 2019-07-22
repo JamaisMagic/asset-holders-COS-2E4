@@ -48,7 +48,7 @@ func createServer() {
 
 func createTicker() {
 	getDataFromBinance()
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(1800 * time.Second)
 	go func() {
 		for range ticker.C {
 			getDataFromBinance()
