@@ -31,13 +31,13 @@ func createServer() {
 		port = "8020"
 	}
 
-	fmt.Println("port: ", port)
+	fmt.Println(time.Now().String(), "port: ", port)
 
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4", func(writer http.ResponseWriter, request *http.Request) {
 		page := request.URL.Query().Get("page")
 		rows := request.URL.Query().Get("rows")
 		fmt.Fprintf(writer, "Hello, page: %s, rows: %s", page, rows)
-		fmt.Println("Hello, page: %s, rows: %s", page, rows)
+		fmt.Println(time.Now().String(), "Hello, page: %s, rows: %s", page, rows)
 	})
 
 	http.ListenAndServe(":" + port, nil)
