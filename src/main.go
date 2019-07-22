@@ -6,7 +6,7 @@ import (
 	"time"
 	"os"
 	"database/sql"
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 	"encoding/json"
 	"io/ioutil"
 	"strings"
