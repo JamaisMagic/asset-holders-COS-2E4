@@ -24,7 +24,7 @@ type HoldersItem struct {
 	Tag string `json:"tag"`
 }
 
-var mysqlDb = *sql.DB
+var mysqlDb *sql.DB
 
 
 func createServer() {
