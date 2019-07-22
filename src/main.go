@@ -8,7 +8,20 @@ import (
 	"os"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"encoding/json"
 )
+
+type HoldersResData struct {
+	totalNum int64
+	addressHolders []HoldersItem
+}
+
+type HoldersItem struct {
+	address string
+	percentage float64
+	quantity float64
+	tag string
+}
 
 
 func createServer() {
@@ -31,15 +44,15 @@ func createServer() {
 }
 
 func createTicker() {
-	ticker := time.NewTicker(30 * 60 * time.Second)
+	ticker := time.NewTicker(10 * time.Second)
 	go func() {
 		for range ticker.C {
-			getFromBinance()
+			getDataFromBinance()
 		}
 	}()
 }
 
-func getFromBinance() {
+func getDataFromBinance() {
 	response, error := http.Get("https://explorer.binance.org/api/v1/asset-holders?page=1&rows=2&asset=COS-2E4")
 	if error != nil {
 
@@ -52,7 +65,15 @@ func getFromBinance() {
 
 	}
 
-	fmt.Println(string(body))
+	var decodedBody HoldersResData
+	decodedError := json.Unmarshal(body, &decodedBody)
+
+	if decodedError != nil {
+
+	}
+
+
+	fmt.Println(decodedBody.totalNum, decodedBody.addressHolders)
 }
 
 func main() {
