@@ -19,7 +19,7 @@ type HoldersResData struct {
 
 type HoldersItem struct {
 	Address string `json:"address"`
-	Quantity string `json:"quantity"`
+	Quantity float64 `json:"quantity"`
 	Percentage float64 `json:"percentage"`
 	Tag string `json:"tag"`
 }
@@ -111,9 +111,9 @@ func buildInsertSql(data HoldersResData) string {
 		item := list[i]
 
 		if i == len(list) - 1 {
-			sb.WriteString(fmt.Sprintf(`("%s","%s","%.4f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
+			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		} else {
-			sb.WriteString(fmt.Sprintf(`("%s","%s","%.4f","%s"),`, item.Address, item.Quantity, item.Percentage, item.Tag))
+			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s"),`, item.Address, item.Quantity, item.Percentage, item.Tag))
 		}
 	}
 	return sb.String()
