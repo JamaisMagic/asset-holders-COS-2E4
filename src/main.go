@@ -44,6 +44,7 @@ func createServer() {
 }
 
 func createTicker() {
+	getDataFromBinance()
 	ticker := time.NewTicker(10 * time.Second)
 	go func() {
 		for range ticker.C {
@@ -55,25 +56,24 @@ func createTicker() {
 func getDataFromBinance() {
 	response, error := http.Get("https://explorer.binance.org/api/v1/asset-holders?page=1&rows=2&asset=COS-2E4")
 	if error != nil {
-
+		fmt.Println(time.Now().String(), "responseError", error)
 	}
 
 	defer response.Body.Close()
 
-	body, error := ioutil.ReadAll(response.Body)
+	body, bodyError := ioutil.ReadAll(response.Body)
 	if error != nil {
-
+		fmt.Println(time.Now().String(), "bodyError", bodyError)
 	}
 
 	var decodedBody HoldersResData
 	decodedError := json.Unmarshal(body, &decodedBody)
 
 	if decodedError != nil {
-		fmt.Println("decodedError", decodedError)
+		fmt.Println(time.Now().String(), "decodedError", decodedError)
 	}
 
-
-	fmt.Println(decodedBody.totalNum, decodedBody.addressHolders)
+	fmt.Println(time.Now().String(), decodedBody.totalNum, decodedBody.addressHolders)
 }
 
 func main() {
