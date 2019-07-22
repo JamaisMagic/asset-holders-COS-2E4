@@ -59,14 +59,14 @@ func createTicker() {
 func getDataFromBinance() {
 	response, error := http.Get("https://explorer.binance.org/api/v1/asset-holders?page=1&rows=2&asset=COS-2E4")
 	if error != nil {
-		fmt.Println(time.Now().String(), "responseError", error)
+		fmt.Println(time.Now().String(), "responseError: ", error)
 	}
 
 	defer response.Body.Close()
 
 	body, bodyError := ioutil.ReadAll(response.Body)
 	if error != nil {
-		fmt.Println(time.Now().String(), "bodyError", bodyError)
+		fmt.Println(time.Now().String(), "bodyError: ", bodyError)
 	}
 
 	// fmt.Println(time.Now().String(), "string body", string(body))
@@ -75,23 +75,25 @@ func getDataFromBinance() {
 	decodedError := json.Unmarshal(body, &decodedBody)
 
 	if decodedError != nil {
-		fmt.Println(time.Now().String(), "decodedError", decodedError)
+		fmt.Println(time.Now().String(), "decodedError: ", decodedError)
 	}
 
 	deleteRe, deleteError := mysqlDb.Query("delete from asset_holders")
 
 	if deleteError != nil {
-		fmt.Println(time.Now().String(), "deleteError", deleteError)
+		fmt.Println(time.Now().String(), "deleteError: ", deleteError)
 	}
 
 	defer deleteRe.Close()
 
 	sqlStr := buildInsertSql(decodedBody)
 
+	fmt.Println(time.Now().String(), "sqlStr: ", sqlStr)
+
 	insert, insertError := mysqlDb.Query(sqlStr)
 
 	if insertError != nil {
-		fmt.Println(time.Now().String(), "insertError", insertError)
+		fmt.Println(time.Now().String(), "insertError: ", insertError)
 	}
 
 	defer insert.Close()
@@ -130,7 +132,7 @@ func connectDb() {
 	mysqlDb, dbError = sql.Open("mysql", dataSourceName)
 
 	if dbError != nil {
-		fmt.Println(time.Now().String(), "dbError", dbError)
+		fmt.Println(time.Now().String(), "dbError: ", dbError)
 	}
 
 	// defer mysqlDb.Close()
