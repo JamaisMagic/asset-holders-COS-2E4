@@ -109,24 +109,35 @@ func buildInsertSql(data HoldersResData) string {
 		item := list[i]
 
 		if i == len(list) - 1 {
-			sb.WriteString("(" + item.Address + "," + fmt.Sprintf("%f", item.Quantity) + "," + fmt.Sprintf("%f", item.Percentage) + "," + item.Tag + ";")
+			sb.WriteString(fmt.Sprintf("(%s,%f,%f,%s);", item.Address, item.Quantity, item.Percentage, item.Tag))
 		} else {
-			sb.WriteString("(" + item.Address + "," + fmt.Sprintf("%f", item.Quantity) + "," + fmt.Sprintf("%f", item.Percentage) + "," + item.Tag + ")")
+			sb.WriteString(fmt.Sprintf("(%s,%f,%f,%s),", item.Address, item.Quantity, item.Percentage, item.Tag))
 		}
 	}
 	return sb.String()
 }
 
-func main() {
+func connectDb() {
+	mysqlHost := os.Getenv("MYSQL_HOST")
+	mysqlPort := os.Getenv("MYSQL_PORT")
+	mysqlUser := os.Getenv("MYSQL_USER")
+	mysqlPwd := os.Getenv("MYSQL_PWD")
+	mysqlDbName := os.Getenv("MYSQL_DB_NAME")
+
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlPort, mysqlDbName)
+
 	var dbError error
-	mysqlDb, dbError = sql.Open("mysql", "root:123456@/explorer_picoluna_com")
+	mysqlDb, dbError = sql.Open("mysql", dataSourceName)
 
 	if dbError != nil {
 		fmt.Println(time.Now().String(), "dbError", dbError)
 	}
 
 	defer mysqlDb.Close()
+}
 
+func main() {
+	connectDb()
 	go createTicker()
 	createServer()
 }
