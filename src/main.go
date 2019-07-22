@@ -4,24 +4,27 @@ import (
 	"net/http"
 	"fmt"
 	"time"
-	"io/ioutil"
 	"os"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"encoding/json"
+	"io/ioutil"
+	"strings"
 )
 
 type HoldersResData struct {
-	totalNum int64
-	addressHolders []HoldersItem
+	TotalNum int64 `json:"totalNum"`
+	AddressHolders []HoldersItem `json:"addressHolders"`
 }
 
 type HoldersItem struct {
-	address string
-	percentage float64
-	quantity float64
-	tag string
+	Address string `json:"address"`
+	Percentage float64 `json:"percentage"`
+	Quantity float64 `json:"quantity"`
+	Tag string `json:"tag"`
 }
+
+var mysqlDb = *sql.DB
 
 
 func createServer() {
@@ -45,7 +48,7 @@ func createServer() {
 
 func createTicker() {
 	getDataFromBinance()
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(30 * time.Second)
 	go func() {
 		for range ticker.C {
 			getDataFromBinance()
@@ -66,6 +69,8 @@ func getDataFromBinance() {
 		fmt.Println(time.Now().String(), "bodyError", bodyError)
 	}
 
+	// fmt.Println(time.Now().String(), "string body", string(body))
+
 	var decodedBody HoldersResData
 	decodedError := json.Unmarshal(body, &decodedBody)
 
@@ -73,15 +78,55 @@ func getDataFromBinance() {
 		fmt.Println(time.Now().String(), "decodedError", decodedError)
 	}
 
-	fmt.Println(time.Now().String(), decodedBody.totalNum, decodedBody.addressHolders)
+	delete, deleteError := mysqlDb.Query("delete from asset_holders")
+
+	if deleteError != nil {
+		fmt.Println(time.Now().String(), "deleteError", deleteError)
+	}
+
+	defer delete.Close()
+
+	sqlStr := buildInsertSql(decodedBody)
+
+	insert, insertError := mysqlDb.Query(sqlStr)
+
+	if insertError != nil {
+		fmt.Println(time.Now().String(), "insertError", insertError)
+	}
+
+	defer insert.Close()
+
+	fmt.Println(time.Now().String(), decodedBody.TotalNum, decodedBody.AddressHolders)
+}
+
+func buildInsertSql(data HoldersResData) string {
+	list := data.AddressHolders
+	var sb strings.Builder
+
+	sb.WriteString("INSERT INTO asset_holders (address,percentage,quantity,tag) VALUES")
+
+	for i := 0; i < len(list); i++ {
+		item := list[i]
+
+		if i == len(list) - 1 {
+			sb.WriteString("(" + item.Address + "," + fmt.Sprintf("%f", item.Quantity) + "," + fmt.Sprintf("%f", item.Percentage) + "," + item.Tag + ";")
+		} else {
+			sb.WriteString("(" + item.Address + "," + fmt.Sprintf("%f", item.Quantity) + "," + fmt.Sprintf("%f", item.Percentage) + "," + item.Tag + ")")
+		}
+	}
+	return sb.String()
 }
 
 func main() {
-	// db, dbError := sql.Open("mysql", "root:123456@/explorer_picoluna_com")
-	//
-	// if dbError != nil {
-	//
-	// }
+	var dbError error
+	mysqlDb, dbError = sql.Open("mysql", "root:123456@/explorer_picoluna_com")
+
+	if dbError != nil {
+		fmt.Println(time.Now().String(), "dbError", dbError)
+	}
+
+	defer mysqlDb.Close()
+
 	go createTicker()
 	createServer()
 }
