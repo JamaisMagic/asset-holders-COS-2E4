@@ -69,7 +69,7 @@ func getDataFromBinance() {
 	decodedError := json.Unmarshal(body, &decodedBody)
 
 	if decodedError != nil {
-
+		fmt.Println("decodedError", decodedError)
 	}
 
 
