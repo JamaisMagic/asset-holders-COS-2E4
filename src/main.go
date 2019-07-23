@@ -34,14 +34,6 @@ func createServer() {
 		port = "8020"
 	}
 
-	http.HandleFunc("/api/v1/asset/holders/cos-2e4", func(writer http.ResponseWriter, request *http.Request) {
-		page := request.URL.Query().Get("page")
-		rows := request.URL.Query().Get("rows")
-
-
-		fmt.Fprintf(writer, "Hello, page: %s, rows: %s", page, rows)
-	})
-
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", func(writer http.ResponseWriter, request *http.Request) {
 		address := request.URL.Query().Get("address")
 
