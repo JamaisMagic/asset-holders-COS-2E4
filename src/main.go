@@ -44,12 +44,27 @@ func createServer() {
 
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", func(writer http.ResponseWriter, request *http.Request) {
 		address := request.URL.Query().Get("address")
-		item := queryItemByAddress(address)
+
+		if len(address) <= 0 {
+			writer.WriteHeader(http.StatusBadRequest)
+			writer.Write(nil)
+			return
+		}
+
+		item, itemError := queryItemByAddress(address)
+
+		if itemError != nil {
+			writer.WriteHeader(http.StatusBadRequest)
+			writer.Write(nil)
+			return
+		}
+
 		resJson, err := json.Marshal(item)
 
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
-			panic(err)
+			writer.Write(nil)
+			return
 		}
 
 		writer.Header().Set("Content-Type", "application/json")
@@ -58,7 +73,6 @@ func createServer() {
 	})
 
 	fmt.Println(time.Now().String(), "Listening port: ", port)
-
 	http.ListenAndServe(":" + port, nil)
 }
 
@@ -101,16 +115,16 @@ func getDataFromBinance() {
 	updateNewData(decodedBody)
 }
 
-func queryItemByAddress(address string) HoldersItem {
+func queryItemByAddress(address string) (HoldersItem, error) {
 	var itemRow HoldersItem
 	queryRow := mysqlDb.QueryRow("select address, quantity, percentage, tag from asset_holders where address = ?", address)
 	err := queryRow.Scan(&itemRow.Address, &itemRow.Quantity, &itemRow.Percentage, &itemRow.Tag)
 
 	if err != nil {
-		panic(err)
+		return itemRow, err
 	}
 
-	return itemRow
+	return itemRow, nil
 }
 
 func updateNewData(decodedBody HoldersResData) {
