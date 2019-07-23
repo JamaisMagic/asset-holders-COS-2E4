@@ -83,7 +83,6 @@ func getDataFromBinance() {
 	response, responseError := http.Get("https://explorer.binance.org/api/v1/asset-holders?page=1&rows=0&asset=COS-2E4")
 
 	if responseError != nil {
-		fmt.Println(time.Now().String(), "responseError: ", responseError)
 		panic(responseError)
 	}
 
@@ -92,7 +91,6 @@ func getDataFromBinance() {
 	body, bodyError := ioutil.ReadAll(response.Body)
 
 	if bodyError != nil {
-		fmt.Println(time.Now().String(), "bodyError: ", bodyError)
 		panic(bodyError)
 	}
 
@@ -100,7 +98,6 @@ func getDataFromBinance() {
 	decodedError := json.Unmarshal(body, &decodedBody)
 
 	if decodedError != nil {
-		fmt.Println(time.Now().String(), "decodedError: ", decodedError)
 		panic(decodedError)
 	}
 
@@ -123,7 +120,6 @@ func updateNewData(decodedBody HoldersResData) {
 	tx, txError := mysqlDb.Begin()
 
 	if txError != nil {
-		fmt.Println(time.Now().String(), "txError: ", txError)
 		panic(txError)
 	}
 
@@ -131,7 +127,6 @@ func updateNewData(decodedBody HoldersResData) {
 
 	if deleteError != nil {
 		tx.Rollback()
-		fmt.Println(time.Now().String(), "deleteError: ", deleteError)
 		panic(deleteError)
 	}
 
@@ -141,7 +136,6 @@ func updateNewData(decodedBody HoldersResData) {
 
 	if insertError != nil {
 		tx.Rollback()
-		fmt.Println(time.Now().String(), "insertError: ", insertError)
 		panic(insertError)
 	}
 
@@ -149,7 +143,6 @@ func updateNewData(decodedBody HoldersResData) {
 
 	if commitError != nil {
 		tx.Rollback()
-		fmt.Println(time.Now().String(), "commitError: ", commitError)
 		panic(commitError)
 	}
 }
@@ -188,7 +181,6 @@ func connectDb() {
 	mysqlDb, dbError = sql.Open("mysql", dataSourceName)
 
 	if dbError != nil {
-		fmt.Println(time.Now().String(), "dbError: ", dbError)
 		panic(dbError)
 	}
 }
