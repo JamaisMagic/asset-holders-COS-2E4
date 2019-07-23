@@ -25,7 +25,7 @@ services:
       - webnet
     restart: always
     volumes:
-      - "/data/app/asset-holders-COS-2E4/src:/data/app/asset-holders-COS-2E4/src"
+      - "/data/app/asset-holders-COS-2E4/src:/go/src/app"
       - "/data/log/asset-holders-COS-2E4:/data/log/asset-holders-COS-2E4"
     depends_on:
       - explorer_picoluna_com_redis
