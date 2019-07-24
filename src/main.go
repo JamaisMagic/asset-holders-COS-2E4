@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"strings"
+	"github.com/go-redis/redis"
 )
 
 type HoldersResData struct {
@@ -24,7 +25,16 @@ type HoldersItem struct {
 	Tag string `json:"tag"`
 }
 
+type VisitCount struct {
+	Ip string `json:"ip"`
+	Count int32 `json:"count"`
+	Message string `json:"message"`
+}
+
+const visitCountPrefix = "visit:count:"
+
 var mysqlDb *sql.DB
+var redisClient *redis.Client
 
 
 func createServer() {
@@ -34,43 +44,14 @@ func createServer() {
 		port = "8020"
 	}
 
-	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", func(writer http.ResponseWriter, request *http.Request) {
-		address := request.URL.Query().Get("address")
-
-		if len(address) <= 0 {
-			writer.WriteHeader(http.StatusBadRequest)
-			writer.Write(nil)
-			return
-		}
-
-		item, itemError := queryItemByAddress(address)
-
-		if itemError != nil {
-			writer.WriteHeader(http.StatusBadRequest)
-			writer.Write(nil)
-			return
-		}
-
-		resJson, err := json.Marshal(item)
-
-		if err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			writer.Write(nil)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusOK)
-		writer.Write(resJson)
-	})
+	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", handlerCos2e4Item)
+	http.HandleFunc("/api/v1/common/visit-count", handleVisitCount)
 
 	fmt.Println(time.Now().String(), "Listening port: ", port)
 	http.ListenAndServe(":" + port, nil)
 }
 
 func createTicker() {
-	getDataFromBinance()
-
 	ticker := time.NewTicker(1800 * time.Second)
 	go func() {
 		for range ticker.C {
@@ -196,8 +177,104 @@ func connectDb() {
 	}
 }
 
+func connectRedis() {
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+
+	redisClient = redis.NewClient(&redis.Options {
+		Addr: fmt.Sprintf("%s:%s", redisHost, redisPort),
+		Password: "",
+		DB: 0,
+	})
+
+	pong, err = redisClient.Ping().Result()
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(time.Now().String(), "Redis connected: ", pong)
+}
+
+func handlerCos2e4Item(writer http.ResponseWriter, request *http.Request) {
+	address := request.URL.Query().Get("address")
+
+	if len(address) <= 0 {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write(nil)
+		return
+	}
+
+	item, itemError := queryItemByAddress(address)
+
+	if itemError != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write(nil)
+		return
+	}
+
+	resJson, err := json.Marshal(item)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(resJson)
+}
+
+func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
+	remoteIp := request.RemoteAddr
+	xForwardedFor := strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0]
+	ip := xForwardedFor
+
+	if len(ip) <= 0 {
+		ip = remoteIp
+	}
+
+	key := visitCountPrefix + ip
+
+	err := redisClient.incr(key).Err()
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
+
+	count, err := redisClient.Get(key).Result()
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
+
+	var resData VisitCount
+
+	resData.Count = count
+	resData.Ip = ip
+	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visit %s times", ip, count)
+
+	resJson, err := json.Marshal(resData)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(resJson)
+}
+
 func main() {
 	connectDb()
+	connectRedis()
 	go createTicker()
 
 	defer func() {
