@@ -237,13 +237,15 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 	key := visitCountPrefix + ip
 
-	err := redisClient.incr(key).Err()
+	err := redisClient.Incr(key).Err()
 
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write(nil)
 		return
 	}
+
+	_ := redisClient.Expire(key, 60).Err()
 
 	count, err := redisClient.Get(key).Result()
 
