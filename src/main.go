@@ -176,6 +176,8 @@ func connectDb() {
 	if dbError != nil {
 		panic(dbError)
 	}
+
+	fmt.Println(time.Now().String(), "MySql connected.")
 }
 
 func connectRedis() {
@@ -201,6 +203,7 @@ func handlerCos2e4Item(writer http.ResponseWriter, request *http.Request) {
 	address := request.URL.Query().Get("address")
 
 	if len(address) <= 0 {
+		fmt.Println(time.Now().String(), "No address: ", address)
 		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write(nil)
 		return
@@ -209,6 +212,7 @@ func handlerCos2e4Item(writer http.ResponseWriter, request *http.Request) {
 	item, itemError := queryItemByAddress(address)
 
 	if itemError != nil {
+		fmt.Println(time.Now().String(), itemError)
 		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write(nil)
 		return
@@ -217,6 +221,7 @@ func handlerCos2e4Item(writer http.ResponseWriter, request *http.Request) {
 	resJson, err := json.Marshal(item)
 
 	if err != nil {
+		fmt.Println(time.Now().String(), err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write(nil)
 		return
@@ -241,16 +246,25 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	err := redisClient.Incr(key).Err()
 
 	if err != nil {
+		fmt.Println(time.Now().String(), err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write(nil)
 		return
 	}
 
-	redisClient.Expire(key, 60).Err()
+	expireError := redisClient.Expire(key, 60 * time.Second).Err()
+
+	if expireError != nil {
+		fmt.Println(time.Now().String(), expireError)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
 
 	count, err := redisClient.Get(key).Result()
 
 	if err != nil {
+		fmt.Println(time.Now().String(), err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write(nil)
 		return
@@ -261,6 +275,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	count64, count64Err := strconv.ParseInt(count, 10, 32)
 
 	if count64Err != nil {
+		fmt.Println(time.Now().String(), count64Err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write(nil)
 		return
@@ -273,6 +288,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	resJson, err := json.Marshal(resData)
 
 	if err != nil {
+		fmt.Println(time.Now().String(), err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write(nil)
 		return
