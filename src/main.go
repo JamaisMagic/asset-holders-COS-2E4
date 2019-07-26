@@ -233,18 +233,17 @@ func handlerCos2e4Item(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
-	remoteIp := request.RemoteAddr
-	xForwardedForStr := request.Header.Get("X-Forwarded-For")
-	xForwardedFor := strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0]
-	ip := xForwardedFor
+	ipAddress := request.RemoteAddr
+	xForwardedFor := request.Header.Get("X-Forwarded-For")
+	xForwardedForIps := strings.Split(xForwardedFor, ",")
 
-	fmt.Println(time.Now().String(), "Remote ip: ", remoteIp, "X-Forwarded-For: ", xForwardedForStr)
-
-	if len(ip) <= 0 {
-		ip = remoteIp
+	if len(xForwardedForIps) >= 0 {
+		ipAddress = xForwardedForIps[0]
 	}
 
-	key := visitCountPrefix + ip
+	fmt.Println(time.Now().String(), "Remote ip: ", ipAddress, "X-Forwarded-For: ", xForwardedFor)
+
+	key := visitCountPrefix + ipAddress
 
 	err := redisClient.Incr(key).Err()
 
@@ -285,8 +284,8 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	resData.Count = int32(count64)
-	resData.Ip = ip
-	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visited %s times", ip, count)
+	resData.Ip = ipAddress
+	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visited %s times", ipAddress, count)
 
 	resJson, err := json.Marshal(resData)
 
