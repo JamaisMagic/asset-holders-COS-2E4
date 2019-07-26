@@ -234,10 +234,11 @@ func handlerCos2e4Item(writer http.ResponseWriter, request *http.Request) {
 
 func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	remoteIp := request.RemoteAddr
+	xForwardedForStr := request.Header.Get("X-Forwarded-For")
 	xForwardedFor := strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0]
 	ip := xForwardedFor
 
-	fmt.Println(time.Now().String(), "Remote ip: ", remoteIp, "X-Forwarded-For: ", xForwardedFor)
+	fmt.Println(time.Now().String(), "Remote ip: ", remoteIp, "X-Forwarded-For: ", xForwardedForStr)
 
 	if len(ip) <= 0 {
 		ip = remoteIp
