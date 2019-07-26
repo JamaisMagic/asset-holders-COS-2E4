@@ -237,6 +237,8 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	xForwardedFor := strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0]
 	ip := xForwardedFor
 
+	fmt.Println(time.Now().String(), "Remote ip: ", remoteIp, "X-Forwarded-For: ", xForwardedFor)
+
 	if len(ip) <= 0 {
 		ip = remoteIp
 	}
@@ -283,7 +285,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 	resData.Count = int32(count64)
 	resData.Ip = ip
-	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visit %s times", ip, count)
+	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visited %s times", ip, count)
 
 	resJson, err := json.Marshal(resData)
 
