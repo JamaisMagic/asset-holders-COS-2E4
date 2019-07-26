@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"github.com/go-redis/redis"
+	"strconv"
 )
 
 type HoldersResData struct {
@@ -187,7 +188,7 @@ func connectRedis() {
 		DB: 0,
 	})
 
-	pong, err = redisClient.Ping().Result()
+	pong, err := redisClient.Ping().Result()
 
 	if err != nil {
 		panic(err)
@@ -245,7 +246,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_ := redisClient.Expire(key, 60).Err()
+	redisClient.Expire(key, 60).Err()
 
 	count, err := redisClient.Get(key).Result()
 
@@ -257,7 +258,15 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 	var resData VisitCount
 
-	resData.Count = count
+	count64, count64Err := strconv.ParseInt(count, 10, 32)
+
+	if count64Err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
+
+	resData.Count = int32(count64)
 	resData.Ip = ip
 	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visit %s times", ip, count)
 
