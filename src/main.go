@@ -12,6 +12,7 @@ import (
 	"strings"
 	"github.com/go-redis/redis"
 	"strconv"
+	_ "net/http/pprof"
 )
 
 type HoldersResData struct {
