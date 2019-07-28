@@ -33,10 +33,8 @@ type VisitCount struct {
 }
 
 const visitCountPrefix = "visit:count:"
-
 var mysqlDb *sql.DB
 var redisClient *redis.Client
-
 
 func createServer() {
 	port := os.Getenv("PORT")
@@ -72,7 +70,6 @@ func getDataFromBinance() {
 	request.Header.Set("Referer", "https://explorer.binance.org/asset/holders/COS-2E4")
 
 	client := &http.Client{}
-
 	response, responseError := client.Do(request)
 
 	if responseError != nil {
@@ -80,7 +77,6 @@ func getDataFromBinance() {
 	}
 
 	defer response.Body.Close()
-
 	body, bodyError := ioutil.ReadAll(response.Body)
 
 	if bodyError != nil {
@@ -124,7 +120,6 @@ func updateNewData(decodedBody HoldersResData) {
 	}
 
 	sqlStr := buildInsertSql(decodedBody)
-
 	_, insertError := tx.Exec(sqlStr)
 
 	if insertError != nil {
@@ -149,7 +144,6 @@ func buildInsertSql(data HoldersResData) string {
 
 	for i := 0; i < listLen; i++ {
 		item := list[i]
-
 		// should encode values or using prepare statement for security reason.
 		if i == listLen - 1 {
 			sb.WriteString(fmt.Sprintf(`("%s","%.8f","%.4f","%s");`, item.Address, item.Quantity, item.Percentage, item.Tag))
@@ -167,9 +161,7 @@ func connectDb() {
 	mysqlUser := os.Getenv("MYSQL_USER")
 	mysqlPwd := os.Getenv("MYSQL_PWD")
 	mysqlDbName := os.Getenv("MYSQL_DB_NAME")
-
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlPort, mysqlDbName)
-
 	var dbError error
 	mysqlDb, dbError = sql.Open("mysql", dataSourceName)
 
@@ -241,10 +233,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 		ipAddress = xForwardedForIps[0]
 	}
 
-	fmt.Println(time.Now().String(), "Remote ip: ", ipAddress, "X-Forwarded-For: ", xForwardedFor)
-
 	key := visitCountPrefix + ipAddress
-
 	err := redisClient.Incr(key).Err()
 
 	if err != nil {
@@ -254,15 +243,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	expireError := redisClient.Expire(key, 60 * time.Second).Err()
-
-	if expireError != nil {
-		fmt.Println(time.Now().String(), expireError)
-		writer.WriteHeader(http.StatusInternalServerError)
-		writer.Write(nil)
-		return
-	}
-
+	_ := redisClient.Expire(key, 60 * time.Second).Err()
 	count, err := redisClient.Get(key).Result()
 
 	if err != nil {
@@ -273,7 +254,6 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	var resData VisitCount
-
 	count64, count64Err := strconv.ParseInt(count, 10, 32)
 
 	if count64Err != nil {
@@ -285,8 +265,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 	resData.Count = int32(count64)
 	resData.Ip = ipAddress
-	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visited %s times", ipAddress, count)
-
+	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visited %s times within 1 minute.", ipAddress, count)
 	resJson, err := json.Marshal(resData)
 
 	if err != nil {
