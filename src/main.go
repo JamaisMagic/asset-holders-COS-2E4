@@ -285,7 +285,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(time.Now().String(), "CPU test started.")
-	createHeavy(1000 * 1000)
+	createHeavy(1000 * 10000)
 	fmt.Println(time.Now().String(), "CPU test ended.")
 
 	writer.Header().Set("Content-Type", "application/json")
