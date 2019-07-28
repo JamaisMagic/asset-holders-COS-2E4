@@ -14,6 +14,7 @@ import (
 	"strconv"
 	_ "net/http/pprof"
 	"log"
+	"runtime/pprof"
 )
 
 type HoldersResData struct {
@@ -297,12 +298,17 @@ func createHeavy(times int) {
 		times = 1000 * 1000
 	}
 
-	for i := 0; i < times; i++ {
+	i := 0
 
+	for i < times {
+		i++
 	}
 }
 
 func main() {
+	pprof.StartCPUProfile(os.Stdout)
+	defer pprof.StopCPUProfile()
+
 	connectDb()
 	connectRedis()
 	go createTicker()
