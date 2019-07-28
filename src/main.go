@@ -13,6 +13,7 @@ import (
 	"github.com/go-redis/redis"
 	"strconv"
 	_ "net/http/pprof"
+	"log"
 )
 
 type HoldersResData struct {
@@ -47,8 +48,7 @@ func createServer() {
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", handlerCos2e4Item)
 	http.HandleFunc("/api/v1/common/visit-count", handleVisitCount)
 
-	fmt.Println(time.Now().String(), "Listening port: ", port)
-	http.ListenAndServe(":" + port, nil)
+	log.Println(http.ListenAndServe(":" + port, nil))
 }
 
 func createTicker() {
