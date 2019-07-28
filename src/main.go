@@ -47,6 +47,7 @@ func createServer() {
 
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", handlerCos2e4Item)
 	http.HandleFunc("/api/v1/common/visit-count", handleVisitCount)
+	http.HandleFunc("/api/v1/test/cpu", handleCpuTest)
 
 	log.Println(http.ListenAndServe(":" + port, nil))
 }
@@ -279,6 +280,26 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(resJson)
+}
+
+func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(time.Now().String(), "CPU test started.")
+	createHeavy(1000 * 1000)
+	fmt.Println(time.Now().String(), "CPU test ended.")
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(nil)
+}
+
+func createHeavy(times int) {
+	if times <= 0 {
+		times = 1000 * 1000
+	}
+
+	for i := 0; i < times; i++ {
+
+	}
 }
 
 func main() {
