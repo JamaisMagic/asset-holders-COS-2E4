@@ -285,12 +285,21 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(time.Now().String(), "CPU test started.")
-	createHeavy(1000 * 10000)
+	count := createHeavy(10000 * 10000)
 	fmt.Println(time.Now().String(), "CPU test ended.")
+
+	resJson, err := json.Marshal(count)
+
+	if err != nil {
+		fmt.Println(time.Now().String(), err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write(nil)
+		return
+	}
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
-	writer.Write(nil)
+	writer.Write(resJson)
 }
 
 func createHeavy(size int) int {
