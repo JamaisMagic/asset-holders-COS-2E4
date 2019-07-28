@@ -243,7 +243,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_ := redisClient.Expire(key, 60 * time.Second).Err()
+	redisClient.Expire(key, 60 * time.Second).Err()
 	count, err := redisClient.Get(key).Result()
 
 	if err != nil {
@@ -265,7 +265,7 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 
 	resData.Count = int32(count64)
 	resData.Ip = ipAddress
-	resData.Message = fmt.Sprintf("Your ip address is %s, you'v visited %s times within 1 minute.", ipAddress, count)
+	resData.Message = fmt.Sprintf("Your ip address is %s, you'v requested this url %s times. The counter will be reset in 1 minute if you do nothing.", ipAddress, count)
 	resJson, err := json.Marshal(resData)
 
 	if err != nil {
