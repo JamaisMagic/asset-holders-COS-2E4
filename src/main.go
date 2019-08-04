@@ -320,9 +320,9 @@ func createHeavy(size int) int {
 }
 
 func main() {
-	pprofFile, _ := os.Create("./pprof/profile.pprof")
-	pprof.StartCPUProfile(pprofFile)
-	defer pprof.StopCPUProfile()
+	// pprofFile, _ := os.Create("./pprof/profile.pprof")
+	// pprof.StartCPUProfile(pprofFile)
+	// defer pprof.StopCPUProfile()
 
 	connectDb()
 	connectRedis()
