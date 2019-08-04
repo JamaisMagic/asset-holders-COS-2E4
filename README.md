@@ -21,7 +21,7 @@ Data syncs every 30 minutes.
 1. Send a http request to the url.
 
 ```bash
-curn -v https://explorer.picoluna.com/api/v1/test/cpu
+curl -v https://explorer.picoluna.com/api/v1/test/cpu
 ```
 
 2. Run go tool pprof to check profile
@@ -35,3 +35,4 @@ go tool pprof https://explorer.picoluna.com/debug/pprof/profile
 1. [https://blog.golang.org/profiling-go-programs](https://blog.golang.org/profiling-go-programs)
 2. [https://flaviocopes.com/golang-profiling/](https://flaviocopes.com/golang-profiling/)
 3. [https://www.integralist.co.uk/posts/profiling-go/](https://www.integralist.co.uk/posts/profiling-go/)
+4. [https://golang.org/pkg/net/http/pprof/](https://golang.org/pkg/net/http/pprof/)
