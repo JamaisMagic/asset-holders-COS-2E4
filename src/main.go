@@ -284,8 +284,8 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
-	pprof.StartCPUProfile(os.Stdout)
-	defer pprof.StopCPUProfile()
+	// pprof.StartCPUProfile(os.Stdout)
+	// defer pprof.StopCPUProfile()
 
 	fmt.Println(time.Now().String(), "CPU test started.")
 	count := createHeavy(100000 * 100000)
@@ -320,6 +320,10 @@ func createHeavy(size int) int {
 }
 
 func main() {
+	pprofFile, _ := os.Create("./pprof/profile.pprof")
+	pprof.StartCPUProfile(pprofFile)
+	defer pprof.StopCPUProfile()
+
 	connectDb()
 	connectRedis()
 	go createTicker()
