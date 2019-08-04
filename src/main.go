@@ -49,6 +49,7 @@ func createServer() {
 	http.HandleFunc("/api/v1/asset/holders/cos-2e4/item", handlerCos2e4Item)
 	http.HandleFunc("/api/v1/common/visit-count", handleVisitCount)
 	http.HandleFunc("/api/v1/test/cpu", handleCpuTest)
+	http.HandleFunc("/api/v1/test/cpu2", handleCpuTest2)
 
 	log.Println(http.ListenAndServe(":" + port, nil))
 }
@@ -284,9 +285,6 @@ func handleVisitCount(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
-	// pprof.StartCPUProfile(os.Stdout)
-	// defer pprof.StopCPUProfile()
-
 	fmt.Println(time.Now().String(), "CPU test started.")
 	count := createHeavy(100000 * 100000)
 	fmt.Println(time.Now().String(), "CPU test ended.")
@@ -303,6 +301,15 @@ func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(resJson)
+}
+
+func handleCpuTest2(writer http.ResponseWriter, request *http.Request) {
+	pprof.StartCPUProfile(os.Stdout)
+	defer pprof.StopCPUProfile()
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(nil)
 }
 
 func createHeavy(size int) int {
