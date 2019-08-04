@@ -16,20 +16,41 @@ curl "https://explorer.picoluna.com/api/v1/asset/holders/cos-2e4/item?address=bn
 
 Data syncs every 30 minutes.
 
-## pprof example
+## pprof cpu profile example
 
-1. Send http request to the url.
+1. add "runtime/pprof" package to you app.
+2. Setup a http server
+    ```go
+    log.Println(http.ListenAndServe(":" + port, nil))
+    ```
+3. Start cpu profile
+    ```bash
+    go tool pprof https://explorer.picoluna.com/debug/pprof/profile
+    ```
+4. At the same time, send requests to the url.
+    ```bash
+    ab -c 1 -n 4 https://explorer.picoluna.com/api/v1/test/cpu
+    ```
+5. After that, you can get cpu profile, and use pprof command to check information.
 
-```bash
-ab -c 8 -n 1000 https://explorer.picoluna.com/api/v1/test/cpu
-```
-
-2. Run go tool pprof to check profile
-
-```bash
-go tool pprof https://explorer.picoluna.com/debug/pprof/profile
-```
-
+    ```text
+    Fetching profile over HTTP from https://explorer.picoluna.com/debug/pprof/profile
+    Saved profile in /Users/jamais/pprof/pprof.main.samples.cpu.005.pb.gz
+    File: main
+    Type: cpu
+    Time: Aug 4, 2019 at 7:19pm (CST)
+    Duration: 30s, Total samples = 17.40s (58.00%)
+    Entering interactive mode (type "help" for commands, "o" for options)
+    (pprof) top
+    Showing nodes accounting for 17.40s, 100% of 17.40s total
+          flat  flat%   sum%        cum   cum%
+        17.40s   100%   100%     17.40s   100%  main.createHeavy
+             0     0%   100%     17.40s   100%  main.handleCpuTest
+             0     0%   100%     17.40s   100%  net/http.(*ServeMux).ServeHTTP
+             0     0%   100%     17.40s   100%  net/http.(*conn).serve
+             0     0%   100%     17.40s   100%  net/http.HandlerFunc.ServeHTTP
+             0     0%   100%     17.40s   100%  net/http.serverHandler.ServeHTTP
+    ```
 ### Referrers
 
 1. [https://blog.golang.org/profiling-go-programs](https://blog.golang.org/profiling-go-programs)
