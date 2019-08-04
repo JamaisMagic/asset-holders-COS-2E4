@@ -288,7 +288,7 @@ func handleCpuTest(writer http.ResponseWriter, request *http.Request) {
 	defer pprof.StopCPUProfile()
 
 	fmt.Println(time.Now().String(), "CPU test started.")
-	count := createHeavy(10000 * 10000)
+	count := createHeavy(1000000 * 1000000)
 	fmt.Println(time.Now().String(), "CPU test ended.")
 
 	resJson, err := json.Marshal(count)

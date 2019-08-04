@@ -18,10 +18,10 @@ Data syncs every 30 minutes.
 
 ## pprof example
 
-1. Send a http request to the url.
+1. Send http request to the url.
 
 ```bash
-curl -v https://explorer.picoluna.com/api/v1/test/cpu
+ab -c 8 -n 1000 https://explorer.picoluna.com/api/v1/test/cpu
 ```
 
 2. Run go tool pprof to check profile
@@ -36,3 +36,4 @@ go tool pprof https://explorer.picoluna.com/debug/pprof/profile
 2. [https://flaviocopes.com/golang-profiling/](https://flaviocopes.com/golang-profiling/)
 3. [https://www.integralist.co.uk/posts/profiling-go/](https://www.integralist.co.uk/posts/profiling-go/)
 4. [https://golang.org/pkg/net/http/pprof/](https://golang.org/pkg/net/http/pprof/)
+5. [https://matoski.com/article/golang-profiling-flamegraphs/](https://matoski.com/article/golang-profiling-flamegraphs/)
