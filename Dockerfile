@@ -5,7 +5,7 @@ ADD . ./
 ENV PORT=8020
 ENV GO111MODULE=on
 
-WORKDIR ./src
+WORKDIR /
 
 RUN apk --no-cache --virtual build-dependencies add \
     git \
