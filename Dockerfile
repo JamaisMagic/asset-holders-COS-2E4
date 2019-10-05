@@ -2,6 +2,8 @@ FROM golang:alpine as development
 
 ADD ./src /go/src/app
 
+COPY ./go.mod /go/go.mod
+
 WORKDIR /go/src/app
 
 ENV PORT=8020
