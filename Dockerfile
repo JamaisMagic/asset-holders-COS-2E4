@@ -2,7 +2,7 @@ FROM golang:alpine as development
 
 ADD ./src /go/src/app
 
-COPY ./go.mod /go/go.mod
+COPY ./go.mod /go.mod
 
 WORKDIR /go/src/app
 
