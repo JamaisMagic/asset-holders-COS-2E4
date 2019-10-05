@@ -15,7 +15,7 @@ import (
 	_ "net/http/pprof"
 	"log"
 	"runtime/pprof"
-	"handlers/cos_chain"
+	"github.com/JamaisMagic/asset-holders-COS-2E4/src/handlers/cos_chain"
 )
 
 type HoldersResData struct {
