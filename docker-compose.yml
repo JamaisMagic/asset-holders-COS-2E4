@@ -8,6 +8,7 @@ services:
       target: development
     image: explorer_picoluna_com:latest
     environment:
+      GO111MODULE: "on"
       APP_ENV: "development"
       APP_PORT: 8020
       REDIS_HOST: explorer_picoluna_com_redis
