@@ -2,10 +2,10 @@ FROM golang:alpine as development
 
 ADD . ./
 
-WORKDIR .
-
 ENV PORT=8020
 ENV GO111MODULE=on
+
+WORKDIR ./src
 
 RUN apk --no-cache --virtual build-dependencies add \
     git \
