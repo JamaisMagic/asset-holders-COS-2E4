@@ -1,11 +1,11 @@
 FROM golang:alpine as development
 
-ADD . ./
+WORKDIR /
+
+ADD . /
 
 ENV PORT=8020
 ENV GO111MODULE=on
-
-WORKDIR /
 
 RUN apk --no-cache --virtual build-dependencies add \
     git \
@@ -13,4 +13,4 @@ RUN apk --no-cache --virtual build-dependencies add \
     && go get -u github.com/go-redis/redis \
     && apk del build-dependencies
 
-CMD ["go", "run", "./src/main.go"]
+CMD ["go", "run", "/src/main.go"]
