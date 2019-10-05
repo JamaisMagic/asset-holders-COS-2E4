@@ -15,7 +15,7 @@ import (
 	_ "net/http/pprof"
 	"log"
 	"runtime/pprof"
-	"github.com/JamaisMagic/asset-holders-COS-2E4/src/handlers/cos_chain"
+	"github.com/JamaisMagic/asset-holders-COS-2E4/src/handlers"
 )
 
 type HoldersResData struct {
@@ -51,7 +51,7 @@ func createServer() {
 	http.HandleFunc("/api/v1/common/visit-count", handleVisitCount)
 	http.HandleFunc("/api/v1/test/cpu", handleCpuTest)
 	http.HandleFunc("/api/v1/test/cpu2", handleCpuTest2)
-	http.HandleFunc("/api/v1/coschain/vote", cos_chain.LikePost)
+	http.HandleFunc("/api/v1/coschain/vote", handlers.LikePost)
 
 	log.Println(http.ListenAndServe(":" + port, nil))
 }
