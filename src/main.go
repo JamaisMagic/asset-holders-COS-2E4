@@ -15,6 +15,7 @@ import (
 	_ "net/http/pprof"
 	"log"
 	"runtime/pprof"
+	"handlers/cos_chain"
 )
 
 type HoldersResData struct {
@@ -50,6 +51,7 @@ func createServer() {
 	http.HandleFunc("/api/v1/common/visit-count", handleVisitCount)
 	http.HandleFunc("/api/v1/test/cpu", handleCpuTest)
 	http.HandleFunc("/api/v1/test/cpu2", handleCpuTest2)
+	http.HandleFunc("/api/v1/coschain/vote", cos_chain.LikePost)
 
 	log.Println(http.ListenAndServe(":" + port, nil))
 }
