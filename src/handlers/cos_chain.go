@@ -25,12 +25,11 @@ type VoteRes struct {
 	Message string `json:"message"`
 }
 
-// conn, _ := rpc.Dial("https://mainnode.contentos.io")
 // var conn, _ = rpc.Dial("34.203.85.235:8888")
 var conn, _ = rpc.Dial("34.207.44.234:8888")
 var rpcClient = grpcpb.NewApiServiceClient(conn)
 // var mChainIdName string = "dev"
-var mChainIdName string = "main"
+var mChainIdName = "main"
 
 
 func VotePost(write http.ResponseWriter, request *http.Request) {
@@ -42,11 +41,12 @@ func VotePost(write http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	fmt.Println(voteReq.AccountName)
+	postIdInt64, err := strconv.ParseUint(voteReq.PostId, 10, 64)
 
-	postIdInt64, _ := strconv.ParseUint(voteReq.PostId, 10, 64)
-
-	fmt.Println("go vote: ", voteReq.AccountName, voteReq.PrivateKey, postIdInt64)
+	if err != nil {
+		http.Error(write, err.Error(), 500)
+		return
+	}
 
 	errVote := vote(voteReq.AccountName, voteReq.PrivateKey, postIdInt64)
 
@@ -84,12 +84,10 @@ func vote(accountNem string, privateKey string, postId uint64) error {
 		return err
 	}
 
-	fmt.Println("signedTx", signedTx)
-
 	errReq := txRequest(signedTx)
 
 	if errReq != nil {
-		fmt.Println("txRequestett", errReq.Error())
+		fmt.Println("txRequesterr", errReq.Error())
 		return errReq
 	}
 
@@ -99,6 +97,7 @@ func vote(accountNem string, privateKey string, postId uint64) error {
 func signTx(privateKey string, ops ...interface{}) (*prototype.SignedTransaction, error) {
 	privKey := &prototype.PrivateKeyType{}
 	pk, err := prototype.PrivateKeyFromWIF(privateKey)
+
 	if err != nil {
 		fmt.Println("PrivateKeyFromWIFerr", err.Error())
 		return nil, err
@@ -113,9 +112,9 @@ func signTx(privateKey string, ops ...interface{}) (*prototype.SignedTransaction
 	}
 
 	refBlockPrefix := binary.BigEndian.Uint32(chainState.Dgpo.HeadBlockId.Hash[8:12])
-	// occupant implement
 	refBlockNum := uint32(chainState.Dgpo.HeadBlockNumber & 0x7ff)
 	tx := &prototype.Transaction{RefBlockNum: refBlockNum, RefBlockPrefix: refBlockPrefix, Expiration: &prototype.TimePointSec{UtcSeconds: chainState.Dgpo.Time.UtcSeconds + 55}}
+
 	for _, op := range ops {
 		tx.AddOperation(op)
 	}
@@ -137,28 +136,31 @@ func signTx(privateKey string, ops ...interface{}) (*prototype.SignedTransaction
 
 func getChainState() (*grpcpb.ChainState, error) {
 	req := &grpcpb.NonParamsRequest{}
-	resp, err := rpcClient.GetChainState(context.Background(), req)
+	res, err := rpcClient.GetChainState(context.Background(), req)
+
 	if err != nil {
 		fmt.Println("getChainStateerr", err.Error())
 		return nil, err
 	}
-	if resp == nil {
+
+	if res == nil {
 		fmt.Println("getChainStateresnil")
 		return nil, errors.New("getChainState res: nil")
 	}
-	return resp.State, nil
+	return res.State, nil
 }
 
 func txRequest(signedTx *prototype.SignedTransaction) error {
 	req := &grpcpb.BroadcastTrxRequest{Transaction: signedTx, Finality: false}
-
 	res, err := rpcClient.BroadcastTrx(context.Background(), req)
+
 	if err != nil {
 		fmt.Println("BroadcastTrxerr", err.Error())
 		return err
 	}
 
 	if res == nil {
+		fmt.Println("BroadcastTrx res nil")
 		return errors.New("BroadcastTrx res nil")
 	}
 
