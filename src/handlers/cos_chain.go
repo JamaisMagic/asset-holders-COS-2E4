@@ -26,7 +26,7 @@ type VoteRes struct {
 }
 
 // conn, _ := rpc.Dial("https://mainnode.contentos.io")
-var conn, _ = rpc.Dial("34.203.85.235")
+var conn, _ = rpc.Dial("34.203.85.235:8888")
 var rpcClient = grpcpb.NewApiServiceClient(conn)
 var mChainIdName string = "dev"
 
