@@ -10,7 +10,7 @@ ENV GO111MODULE=on
 RUN apk --no-cache --virtual build-dependencies add \
     git \
     && go get -u github.com/go-sql-driver/mysql \
-    && go get -u github.com/go-redis/redis \
-    && apk del build-dependencies
+    && go get -u github.com/go-redis/redis
+    # && apk del build-dependencies
 
 CMD ["go", "run", "/src/main.go"]
