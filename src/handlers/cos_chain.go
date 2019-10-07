@@ -12,6 +12,7 @@ import (
 	"hash/crc32"
 	"errors"
 	"strconv"
+	"os"
 )
 
 type VoteReq struct {
@@ -25,9 +26,9 @@ type VoteRes struct {
 	Message string `json:"message"`
 }
 
-var conn, _ = rpc.Dial("34.207.44.234:8888")
+var conn, _ = rpc.Dial(os.Getenv("CHAIN_HOST"))
 var rpcClient = grpcpb.NewApiServiceClient(conn)
-var mChainIdName = "main"
+var mChainIdName = os.Getenv("CHAIN_ID")
 
 
 func VotePost(write http.ResponseWriter, request *http.Request) {
