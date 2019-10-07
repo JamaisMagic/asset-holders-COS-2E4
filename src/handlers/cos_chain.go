@@ -8,7 +8,6 @@ import (
 	"github.com/coschain/contentos-go/prototype"
 	"github.com/coschain/contentos-go/rpc"
 	"github.com/coschain/contentos-go/rpc/pb"
-	"google.golang.org/grpc"
 	"encoding/binary"
 	"hash/crc32"
 	"errors"
@@ -43,7 +42,7 @@ func VotePost(write http.ResponseWriter, request *http.Request) {
 
 	fmt.Println(voteReq.AccountName)
 
-	postIdInt64, _ := strconv.ParseInt(voteReq.PostId, 10, 64)
+	postIdInt64, _ := strconv.ParseUint(voteReq.PostId, 10, 64)
 
 	errVote := vote(voteReq.AccountName, voteReq.PrivateKey, postIdInt64)
 
@@ -68,7 +67,7 @@ func VotePost(write http.ResponseWriter, request *http.Request) {
 	write.Write(output)
 }
 
-func vote(accountNem string, privateKey string, postId int64) error {
+func vote(accountNem string, privateKey string, postId uint64) error {
 	voteOP := &prototype.VoteOperation {
 		Voter: prototype.NewAccountName(accountNem),
 		Idx:   postId,
