@@ -29,7 +29,7 @@ type VoteRes struct {
 // var conn, _ = rpc.Dial("34.203.85.235:8888")
 var conn, _ = rpc.Dial("34.207.44.234:8888")
 var rpcClient = grpcpb.NewApiServiceClient(conn)
-# var mChainIdName string = "dev"
+// var mChainIdName string = "dev"
 var mChainIdName string = "main"
 
 
