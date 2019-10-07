@@ -7,4 +7,6 @@ require (
 	google.golang.org/grpc v1.22.1
 	github.com/pkg/errors v0.8.1
 	github.com/gogo/protobuf v1.2.0
+	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-redis/redis v6.15.5
 )
