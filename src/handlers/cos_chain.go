@@ -44,6 +44,8 @@ func VotePost(write http.ResponseWriter, request *http.Request) {
 
 	postIdInt64, _ := strconv.ParseUint(voteReq.PostId, 10, 64)
 
+	fmt.Println("go vote: ", voteReq.AccountName, voteReq.PrivateKey, postIdInt64)
+
 	errVote := vote(voteReq.AccountName, voteReq.PrivateKey, postIdInt64)
 
 	var voteRes VoteRes
@@ -76,12 +78,16 @@ func vote(accountNem string, privateKey string, postId uint64) error {
 	signedTx, err := signTx(privateKey, voteOP)
 
 	if err != nil {
+		fmt.Println("signedTxerr", err.Error())
 		return err
 	}
+
+	fmt.Println("signedTx", signedTx)
 
 	errReq := txRequest(signedTx)
 
 	if errReq != nil {
+		fmt.Println("txRequestett", errReq.Error())
 		return errReq
 	}
 
