@@ -114,6 +114,13 @@ func signTx(privateKey string, ops ...interface{}) (*prototype.SignedTransaction
 	refBlockNum := uint32(chainState.Dgpo.HeadBlockNumber & 0x7ff)
 	tx := &prototype.Transaction{RefBlockNum: refBlockNum, RefBlockPrefix: refBlockPrefix, Expiration: &prototype.TimePointSec{UtcSeconds: chainState.Dgpo.Time.UtcSeconds + 55}}
 
+	fmt.Println("chainState.Dgpo.HeadBlockId.Hash: ", chainState.Dgpo.HeadBlockId.Hash)
+	fmt.Println("chainState.Dgpo.HeadBlockId.Hash[8:12]: ", chainState.Dgpo.HeadBlockId.Hash[8:12])
+	fmt.Println("chainState.Dgpo.HeadBlockNumber: ", chainState.Dgpo.HeadBlockNumber)
+	fmt.Println("chainState.Dgpo.HeadBlockNumber & 0x7ff: ", chainState.Dgpo.HeadBlockNumber & 0x7ff)
+	fmt.Println("refBlockPrefix: ", refBlockPrefix)
+	fmt.Println("refBlockNum: ", refBlockNum)
+
 	for _, op := range ops {
 		tx.AddOperation(op)
 	}
