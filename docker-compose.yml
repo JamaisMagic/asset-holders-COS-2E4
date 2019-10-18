@@ -10,7 +10,7 @@ services:
     environment:
       GO111MODULE: "on"
       CHAIN_ID: "main"
-      CHAIN_HOST: "localhost:8888"
+      CHAIN_HOST: "34.207.44.234:8888"
       APP_ENV: "development"
       APP_PORT: 8020
       REDIS_HOST: explorer_picoluna_com_redis
