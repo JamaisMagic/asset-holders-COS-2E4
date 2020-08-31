@@ -66,7 +66,7 @@ func createTicker() {
 }
 
 func getDataFromBinance() {
-	request, requestError := http.NewRequest("GET", "https://explorer.binance.org/api/v1/asset-holders?page=1&rows=0&asset=COS-2E4", nil)
+	request, requestError := http.NewRequest("GET", "https://explorer.binance.org/api/v1/asset-holders?page=1&rows=1&asset=COS-2E4", nil)
 
 	if requestError != nil {
 		panic(requestError)

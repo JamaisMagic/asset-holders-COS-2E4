@@ -8,5 +8,5 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/gogo/protobuf v1.3.0
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/go-redis/redis v6.15.5
+	github.com/go-redis/redis v6.15.5+incompatible
 )
